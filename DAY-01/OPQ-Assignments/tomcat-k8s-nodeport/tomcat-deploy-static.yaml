@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat
+  labels:
+    app: tomcat
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tomcat
+  template:
+    metadata:
+      name: tomcat
+      labels:
+        app: tomcat
+    spec:
+      volumes:
+        - name: persistent-volume
+          persistentVolumeClaim:
+            claimName: tomcat-pvc
+        - name: config-volume
+          configMap:
+            name: tomcat-configmap
+        - name: secret-volume
+          secret:
+            secretName: tomcat-secret
+      containers:
+        - name: tomcat
+          image: anand1565/tomcat-final
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: persistent-volume
+              mountPath: /data
+            - name: config-volume
+              mountPath: /etc/config
+            - name: secret-volume
+              mountPath: /etc/secret

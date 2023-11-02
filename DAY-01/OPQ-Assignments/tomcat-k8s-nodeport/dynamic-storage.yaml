@@ -1,0 +1,47 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: tomcat-ebs-sc
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp2
+volumeBindingMode: WaitForFirstConsumer
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: 
+  name: tomcat-ebs-claim
+spec:
+  storageClassName: tomcat-ebs-sc
+  resources:
+    requests:
+      storage: 1Gi
+  accessModes: 
+    - ReadWriteOnce
+
+#Installing Helm
+
+Run the following commands to install Helm
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+
+#Installing AWS EBS CSI Driver
+Create a secret to store your AWS access key and secret key using the following command:
+kubectl create secret generic aws-secret \
+    --namespace kube-system \
+    --from-literal "key_id=${AWS_ACCESS_KEY_ID}" \
+    --from-literal "access_key=${AWS_SECRET_ACCESS_KEY}"
+
+#Add the AWS EBS CSI Driver Helm chart repository:
+helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+helm repo update
+
+#Deploy the AWS EBS CSI Driver using the following command:
+helm upgrade --install aws-ebs-csi-driver \
+    --namespace kube-system \
+    aws-ebs-csi-driver/aws-ebs-csi-driver
+
+#Verify that the driver has been deployed and the pods are running:
+kubectl get pods -n kube-system -l app.kubernetes.io/name=aws-ebs-csi-driver

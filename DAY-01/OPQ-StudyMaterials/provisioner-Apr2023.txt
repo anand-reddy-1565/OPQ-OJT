@@ -1,0 +1,42 @@
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_instance" "terrrafom-instance-1" {
+    ami = "ami-0f5ee92e2d63afc18"
+    instance_type = "t2.micro"
+    key_name= "devops"
+    tags = {
+        "Name" = "server"
+    }
+
+    connection {
+        type = "ssh"
+        user = "ubuntu"
+        host = self.public_ip
+        private_key = file("./devops.pem")
+    }
+
+    provisioner "file" {
+        source = "./script.sh"
+        destination = "/home/ubuntu/script.sh"
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            "chmod u+x /home/ubuntu/script.sh",
+            "sh /home/ubuntu/script.sh"
+        ]
+    }
+
+    provisioner "local-exec" {
+        command = "echo The Public IP of the ec2 instance is ${self.public_ip} > publicip.txt" 
+        interpreter = [ "bash", "-c" ]
+    }
+
+    provisioner "local-exec" {
+        when = destroy
+        command = "echo The resource was destroyed on `date`  > destroy.txt"
+        interpreter = [ "bash", "-c" ]
+    }
+}

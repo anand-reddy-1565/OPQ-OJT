@@ -1,0 +1,21 @@
+provider "aws" {
+    region = "ap-south-1"
+}
+
+data "aws_instance" "terraform-data" {
+    instance_id = "i-0417e35bd31f24000"
+}
+
+resource "null_resource" "provisioners" {
+
+    connection {
+        type = "ssh"
+        user = "ubuntu"
+        host = data.aws_instance.terraform-data.public_ip
+        private_key = file("./devops.pem")
+    }
+
+    provisioner "remote-exec" {
+        script = "./script.sh"
+    }
+}    

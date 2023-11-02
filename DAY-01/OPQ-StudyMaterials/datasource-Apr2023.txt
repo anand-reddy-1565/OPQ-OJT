@@ -1,0 +1,19 @@
+provider "aws" {
+    region = "ap-south-1"
+}
+
+data "aws_instance" "data-instance" {
+    instance_id = "i-0b0f6988ec578088e"
+}
+
+output "instance-ami" {
+    value = data.aws_instance.data-instance.ami
+}
+
+output "instance-ip" {
+    value = data.aws_instance.data-instance.public_ip
+}
+
+output "instance-private-ip" {
+    value = data.aws_instance.data-instance.private_ip
+}

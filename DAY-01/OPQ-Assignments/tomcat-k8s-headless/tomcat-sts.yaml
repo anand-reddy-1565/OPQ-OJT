@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  name: tomcat-sts
+spec:
+  serviceName: "headless-svc"
+  replicas: 3
+  selector:
+    matchLabels: 
+      app: tomcat
+  template:
+    metadata:
+      labels:
+        app: tomcat
+    spec:
+      containers:
+      - name: tomcat
+        image: anand1565/tomcat-final
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+          - name:  tomcat-pvc
+            mountPath: /data
+  volumeClaimTemplate:
+  - metadata:
+      name: tomcat-pvc
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:  
+        requests:
+          storage: 1Gi      
+      storageClassName: tomcat-ebs-sc
+
+---
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: tomcat-ebs-sc
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp2
+volumeBindingMode: WaitForFirstConsumer
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: 
+  name: tomcat-ebs-claim
+spec:
+  storageClassName: tomcat-ebs-sc
+  resources:
+    requests:
+      storage: 1Gi
+  accessModes: 
+    - ReadWriteOnce

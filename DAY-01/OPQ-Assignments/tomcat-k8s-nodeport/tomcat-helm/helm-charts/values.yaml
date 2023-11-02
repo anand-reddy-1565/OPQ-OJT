@@ -1,0 +1,19 @@
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8080
+  name:  tomcat
+  targetPort: 8080
+  nodePort: 31000
+
+containers:
+  image:  anand1565/tomcat-final
+  name:  tomcat
+  port: 8080
+
+ 

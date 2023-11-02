@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metaddata: 
+  name: headless-svc
+spec: 
+  selectors:
+    app: tomcat
+  ports:
+  - port: 8080
+    name: web
+  clusetrIp: None
